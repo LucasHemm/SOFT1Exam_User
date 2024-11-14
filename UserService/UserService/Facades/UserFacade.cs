@@ -26,4 +26,16 @@ public class UserFacade
         return user;
     }
     
+    //login, should just take a email and password and then return the user by using a find on email and password
+    public UserDTO Login(UserDTO userDto)
+    {
+        User user = _context.Users.FirstOrDefault(u => u.Email == userDto.Email && u.Password == userDto.Password);
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+        UserDTO LoggedInUserDto = new UserDTO(user);
+        return LoggedInUserDto;
+    }
+    
 }
