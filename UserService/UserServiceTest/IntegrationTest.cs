@@ -77,4 +77,27 @@ public class IntegrationTest : IAsyncLifetime
             Assert.Equal(userDto.Email, loggedInUser.Email);
         }
     }
+    //should update user email and password
+    [Fact]
+    public void ShouldUpdateUser()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer(_connectionString)
+            .Options;
+
+        using (var context = new ApplicationDbContext(options))
+        {
+            UserFacade userFacade = new UserFacade(context);
+
+            UserDTO userDto = new UserDTO(0, "mail", "password");
+            User user = userFacade.CreateUser(userDto);
+            
+            UserDTO userDtoWithUpdatedInfo = new UserDTO(user.Id, "newmail", "newpassword");
+            
+            //find user
+            UserDTO updatedUser = userFacade.UpdateUser(userDtoWithUpdatedInfo);
+            Assert.NotNull(updatedUser);
+            Assert.Equal(userDtoWithUpdatedInfo.Email, updatedUser.Email);
+        }
+    }
 }

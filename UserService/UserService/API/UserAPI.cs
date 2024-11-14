@@ -43,4 +43,19 @@ public class UserAPI : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+    
+    //update user
+    [HttpPut]
+    public IActionResult UpdateUser([FromBody] UserDTO userDto)
+    {
+        try
+        {
+            UserDTO userDTO = _customerFacade.UpdateUser(userDto);
+            return Ok(userDTO);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }
