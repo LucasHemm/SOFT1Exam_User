@@ -128,8 +128,65 @@ public class UserApiTest : IAsyncLifetime
 
         var response2 = await _client.PostAsJsonAsync("/api/UserApi/login", userDto);
         var loggedinuser = await response2.Content.ReadFromJsonAsync<UserDTO>();
-        
+
         Assert.NotNull(loggedinuser);
         Assert.Equal(userDto.Email, loggedinuser.Email);
     }
+
+     [Fact]
+        public async Task ShouldUpdateUser()
+        {
+            // Arrange
+            var originalUserDto = new UserDTO(
+                0,
+                "originaluser@example.com",
+                "originalpassword"
+            );
+
+            // Step 1: Create the original user
+            var createResponse = await _client.PostAsync("/api/UserApi", GetStringContent(originalUserDto));
+            createResponse.EnsureSuccessStatusCode();
+            var createResponseString = await createResponse.Content.ReadAsStringAsync();
+            Assert.Equal("User created successfully", createResponseString);
+
+            // Step 2: Retrieve the created user's ID from the database
+            int userId;
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var user = await context.Users.FirstOrDefaultAsync(u => u.Email == originalUserDto.Email);
+                Assert.NotNull(user);
+                userId = user.Id;
+            }
+
+            // Step 3: Prepare the updated user DTO
+            var updatedUserDto = new UserDTO(
+                userId,
+                "updateduser@example.com",
+                "updatedpassword"
+            );
+
+            // Step 4: Send the update request
+            var updateResponse = await _client.PutAsync("/api/UserApi", GetStringContent(updatedUserDto));
+
+            // Step 5: Assert the update response
+            updateResponse.EnsureSuccessStatusCode();
+
+            // Instead of expecting a plain text message, read the response as UserDTO
+            var updateResponseContent = await updateResponse.Content.ReadFromJsonAsync<UserDTO>();
+            Assert.NotNull(updateResponseContent);
+            Assert.Equal(updatedUserDto.Id, updateResponseContent.Id);
+            Assert.Equal(updatedUserDto.Email, updateResponseContent.Email);
+            Assert.Equal(updatedUserDto.Password, updateResponseContent.Password);
+
+            // Step 6: Verify the user's information in the database is updated
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var updatedUser = await context.Users.FindAsync(userId);
+                Assert.NotNull(updatedUser);
+                Assert.Equal(updatedUserDto.Email, updatedUser.Email);
+                Assert.Equal(updatedUserDto.Password, updatedUser.Password);
+            }
+        }
 }

@@ -38,4 +38,22 @@ public class UserFacade
         return LoggedInUserDto;
     }
     
+    //update user email and password
+    public UserDTO UpdateUser(UserDTO userDto)
+    {
+        User user = _context.Users.Find(userDto.Id);
+        //if null throw exception
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+        user.Email = userDto.Email;
+        user.Password = userDto.Password;
+        _context.SaveChanges();
+        //return the updated user
+        UserDTO updatedUserDto = new UserDTO(user);
+        return updatedUserDto;
+    }
+    
+    
 }
