@@ -58,4 +58,23 @@ public class IntegrationTest : IAsyncLifetime
             Assert.Equal(userDto.Email, createdUser.Email);
         }
     }
+    //login test
+    [Fact]
+    public void ShouldLoginUser()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer(_connectionString)
+            .Options;
+
+        using (var context = new ApplicationDbContext(options))
+        {
+            UserFacade userFacade = new UserFacade(context);
+
+            UserDTO userDto = new UserDTO(0, "mail", "password");
+            User user = userFacade.CreateUser(userDto);
+            UserDTO loggedInUser = userFacade.Login(userDto);
+            Assert.NotNull(loggedInUser);
+            Assert.Equal(userDto.Email, loggedInUser.Email);
+        }
+    }
 }

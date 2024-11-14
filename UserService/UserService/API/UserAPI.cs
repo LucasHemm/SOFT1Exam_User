@@ -28,4 +28,19 @@ public class UserAPI : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+    
+    //login should return the user
+    [HttpPost ("login")]
+    public IActionResult Login([FromBody] UserDTO userDto)
+    {
+        try
+        {
+            UserDTO LoggedInUserDto = _customerFacade.Login(userDto);
+            return Ok(LoggedInUserDto);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }
