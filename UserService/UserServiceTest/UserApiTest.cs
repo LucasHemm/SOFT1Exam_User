@@ -90,8 +90,9 @@ public class UserApiTest : IAsyncLifetime
 
         // Assert
         response.EnsureSuccessStatusCode();
-        var responseString = await response.Content.ReadAsStringAsync();
-        Assert.Equal("User created successfully", responseString);
+        var responseString = await response.Content.ReadFromJsonAsync(typeof(UserDTO));
+        Assert.Equal(userDto.Email, ((UserDTO)responseString).Email);
+        
 
         // Verify the customer is in the database
         using (var scope = _factory.Services.CreateScope())
@@ -122,8 +123,7 @@ public class UserApiTest : IAsyncLifetime
 
         // Assert
         response.EnsureSuccessStatusCode();
-        var responseString = await response.Content.ReadAsStringAsync();
-        Assert.Equal("User created successfully", responseString);
+       
 
 
         var response2 = await _client.PostAsJsonAsync("/api/UserApi/login", userDto);
@@ -146,8 +146,7 @@ public class UserApiTest : IAsyncLifetime
             // Step 1: Create the original user
             var createResponse = await _client.PostAsync("/api/UserApi", GetStringContent(originalUserDto));
             createResponse.EnsureSuccessStatusCode();
-            var createResponseString = await createResponse.Content.ReadAsStringAsync();
-            Assert.Equal("User created successfully", createResponseString);
+           
 
             // Step 2: Retrieve the created user's ID from the database
             int userId;
