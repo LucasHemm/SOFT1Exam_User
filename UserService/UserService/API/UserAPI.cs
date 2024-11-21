@@ -20,8 +20,8 @@ public class UserAPI : ControllerBase
     {
         try
         {
-            _customerFacade.CreateUser(userDto);
-            return Ok("User created successfully");
+            UserDTO createdUser = new UserDTO(_customerFacade.CreateUser(userDto));
+            return Ok(createdUser);
         }
         catch (Exception ex)
         {
