@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Prometheus;
 using UserService.Facades;
 
 namespace UserService;
@@ -41,7 +42,15 @@ public class Program
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             // Apply any pending migrations and create the database if it doesn't exist
-            dbContext.Database.Migrate();
+            try
+            {
+                dbContext.Database.Migrate();
+                
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         // Configure the HTTP request pipeline.
@@ -50,9 +59,12 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1"));
         }
+        
+        app.UseRouting();
+        app.UseMetricServer(); // Default /metrics endpoint
+        app.UseHttpMetrics(); // Enable HttpMetrics
 
         app.UseCors("AllowAll");
-        app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();
 
