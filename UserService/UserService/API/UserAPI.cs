@@ -21,7 +21,7 @@ public class UserAPI : ControllerBase
         try
         {
             UserDTO createdUser = new UserDTO(_customerFacade.CreateUser(userDto));
-            return Ok("User created successfully");
+            return Ok(createdUser);
         }
         catch (Exception ex)
         {
